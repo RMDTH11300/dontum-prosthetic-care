@@ -6,7 +6,7 @@ const toDate = value => value ? new Date(`${value}T12:00:00`).toLocaleDateString
 const statuses = {pending:'รอตรวจสอบ',review:'กำลังประเมิน', 'needs-info':'เตรียมเพิ่มเติม',scheduled:'ยืนยันวันนัด',completed:'รับบริการแล้ว'};
 const typeNames = {BK:'ใต้เข่า (BK)',TK:'ผ่านข้อเข่า (TK)',AK:'เหนือเข่า (AK)',HIP:'ระดับสะโพก (Hip)',SYME:'ระดับข้อเท้า (Syme)'};
 const state = {
-  page:'home', step:1, filter:'all', staffSearch:'', trackingId:'DT-26001',
+  page:'home', step:1, filter:'all', staffSearch:'', trackingId:'DT-26001', trackingName:'',
   submittedId:null, photos:{front:null,side:null,back:null}, photoUrls:{},
   form:{name:'',phone:'',service:'new',level:'BK',side:'left',amputationDate:'',province:'',medical:'',wound:'',swelling:'',pain:'',movement:'',mobility:'',symptoms:'',other:'',consent:false},
   follow:{id:'DT-26001',date:'',wearTime:'',pain:'2',skin:'none',walk:'',fall:'no',socket:'good',notes:''},
@@ -23,6 +23,14 @@ const pageHeading=(en,title,detail)=>`<div class="page-heading"><div class="eyeb
 const badge=status=>`<span class="status-pill ${esc(status)}">● ${statuses[status] || 'ไม่ทราบสถานะ'}</span>`;
 const primary=(label,attrs='')=>`<button class="btn btn-primary" ${attrs}>${label}</button>`;
 const field=(key,label,placeholder='',required=false,type='text')=>`<div class="field"><label for="field-${key}">${label}${required?'<span class="required"> *</span>':''}</label><input id="field-${key}" type="${type}" data-form="${key}" value="${esc(state.form[key])}" ${required?'required':''} placeholder="${esc(placeholder)}" /></div>`;
+const normalizeName=value=>String(value||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('th');
+function beAmputationDateField(){
+  const [year='',month='',day='']=state.form.amputationDate?state.form.amputationDate.split('-'):[];
+  const monthNames=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const currentYear=new Date().getFullYear()+543;
+  const make=(part,placeholder,options,value)=>`<select data-amputation-part="${part}" aria-label="${placeholder}"><option value="">${placeholder}</option>${options.map(([v,label])=>`<option value="${v}" ${v===value?'selected':''}>${label}</option>`).join('')}</select>`;
+  return `<div class="field"><label>วันที่ตัดขา (ถ้าทราบ) — ปี พ.ศ.</label><div class="field-grid" style="grid-template-columns:0.8fr 1.4fr 1fr;gap:8px">${make('day','วัน',Array.from({length:31},(_,i)=>[String(i+1).padStart(2,'0'),i+1]),day)}${make('month','เดือน',monthNames.map((m,i)=>[String(i+1).padStart(2,'0'),m]),month)}${make('year','ปี พ.ศ.',Array.from({length:110},(_,i)=>[String(currentYear-i-543),String(currentYear-i)]),year)}</div><div class="field-help">เลือกวัน เดือน และปีพุทธศักราช ระบบจะแปลงปีสำหรับจัดเก็บข้อมูลสาธิตอัตโนมัติ</div></div>`;
+}
 const select=(key,label,opts)=>`<div class="field"><label for="field-${key}">${label}</label><select id="field-${key}" data-form="${key}">${opts.map(([v,t])=>`<option value="${esc(v)}" ${state.form[key]===v?'selected':''}>${esc(t)}</option>`).join('')}</select></div>`;
 const yesNo=(key,label,options=[['no','ไม่มี'],['yes','มี'],['unsure','ไม่แน่ใจ']])=>`<div class="question"><label class="q-label">${label}</label><div class="choice-row">${options.map(([v,t])=>`<label class="choice"><input type="radio" data-form="${key}" name="${key}" value="${v}" ${state.form[key]===v?'checked':''}>${t}</label>`).join('')}</div></div>`;
 function toast(message){const el=document.createElement('div');el.className='toast';el.textContent=message;$('#toastRegion').appendChild(el);setTimeout(()=>el.remove(),4200)}
@@ -31,7 +39,7 @@ function render(){
   $$('.nav-item').forEach(button=>button.classList.toggle('active',button.dataset.page===state.page));
   $('#currentTitle').textContent=headings[state.page];
   $('#queueBadge').textContent=state.records.filter(r=>['pending','review','needs-info'].includes(r.status)).length;
-  const pages={home:renderHome,request:renderRequest,tracking:renderTracking,guides:renderGuides,exercise:renderExercise,followup:renderFollowup,staff:renderStaff};
+  const pages={home:renderHome,request:renderRequest,tracking:renderTrackingByName,guides:renderGuides,exercise:renderExercise,followup:renderFollowup,staff:renderStaff};
   $('#pageContent').innerHTML=pages[state.page]();
   bindPage();
 }
@@ -46,7 +54,7 @@ function renderRequest(){
   if(state.submittedId){return `${pageHeading('REQUEST COMPLETE','ส่งคำขอสาธิตเรียบร้อย','ระบบจำลองขั้นตอนการยื่นคำขอโดยไม่ส่งข้อมูลไปยังเซิร์ฟเวอร์')}<div class="panel success-panel"><div class="success-icon">✓</div><h2>รับคำขอเรียบร้อยแล้ว</h2><p>รหัสคำขอสาธิตของคุณคือ</p><div class="reference-code">${esc(state.submittedId)}</div><p>เจ้าหน้าที่สามารถตรวจสอบและกำหนดวันนัดในหน้า “จัดการคิวนัด”<br>เมื่อกำหนดนัดแล้วสามารถกลับมาตรวจสอบในเมนู “ติดตามสถานะ / วันนัด” ได้ในแท็บนี้</p><button class="btn btn-primary" data-goto="tracking">ติดตามคำขอ →</button></div>`}
   const steps=['ข้อมูลผู้ขอรับบริการ','แบบประเมินความพร้อม','ภาพตอขา 3 มุม','ตรวจสอบและยืนยัน'];
   let content='';
-  if(state.step===1){content=`<div class="form-section-title">ข้อมูลส่วนบุคคล (ใช้ข้อมูลสมมติสำหรับสาธิต)</div><div class="field-grid">${field('name','ชื่อ-นามสกุล','ตัวอย่าง: ผู้ป่วยสาธิต',true)}${field('phone','เบอร์โทรศัพท์','ตัวอย่าง: 08X-XXX-XXXX',true)}${select('service','ประเภทบริการ',[['new','ทำขาเทียมครั้งแรก'],['replace','ทำขาเทียมทดแทน'],['repair','ซ่อมหรือปรับแก้ขาเทียม']])}${select('level','ระดับการตัดขา',Object.entries(typeNames))}${select('side','ข้างที่ตัดขา',[['left','ซ้าย'],['right','ขวา'],['both','ทั้งสองข้าง']])}${field('amputationDate','วันที่ตัดขา (ถ้าทราบ)','','', 'date')}${field('province','จังหวัดที่พักอาศัย','เช่น นครปฐม')}</div><div class="notice teal"><span>ⓘ</span><div>กรณีผู้ป่วยไม่สะดวกกรอกด้วยตนเอง สามารถให้ญาติหรือผู้ดูแลช่วยกรอกได้ในระบบจริง โดยต้องมีการตรวจสอบสิทธิ์และความยินยอมอย่างเหมาะสม</div></div>`}
+  if(state.step===1){content=`<div class="form-section-title">ข้อมูลส่วนบุคคล (ใช้ข้อมูลสมมติสำหรับสาธิต)</div><div class="field-grid">${field('name','ชื่อ-นามสกุล','ตัวอย่าง: ผู้ป่วยสาธิต',true)}${field('phone','เบอร์โทรศัพท์','ตัวอย่าง: 08X-XXX-XXXX',true)}${select('service','ประเภทบริการ',[['new','ทำขาเทียมครั้งแรก'],['replace','ทำขาเทียมทดแทน'],['repair','ซ่อมหรือปรับแก้ขาเทียม']])}${select('level','ระดับการตัดขา',Object.entries(typeNames))}${select('side','ข้างที่ตัดขา',[['left','ซ้าย'],['right','ขวา'],['both','ทั้งสองข้าง']])}${beAmputationDateField()}${field('province','จังหวัดที่พักอาศัย','เช่น นครปฐม')}</div><div class="notice teal"><span>ⓘ</span><div>กรณีผู้ป่วยไม่สะดวกกรอกด้วยตนเอง สามารถให้ญาติหรือผู้ดูแลช่วยกรอกได้ในระบบจริง โดยต้องมีการตรวจสอบสิทธิ์และความยินยอมอย่างเหมาะสม</div></div>`}
   if(state.step===2){content=`${yesNo('wound','1. ปัจจุบันยังมีแผลเปิด แผลมีน้ำเหลือง หรือแผลยังไม่หายสนิทหรือไม่?')}${yesNo('swelling','2. ตอขายังมีอาการบวมมากกว่าปกติหรือไม่?')}${yesNo('pain','3. มีอาการปวดตอขาหรือปวดรุนแรงที่รบกวนชีวิตประจำวันหรือไม่?')}${yesNo('movement','4. มีข้อยึดติด หรือเหยียดข้อสะโพก/ข้อเข่าได้ไม่เต็มช่วงหรือไม่?')}${yesNo('mobility','5. สามารถเคลื่อนย้ายตัวเองและทรงตัวได้ตามความสามารถปัจจุบันหรือไม่?',[['yes','ได้'],['partial','ได้บางส่วน'],['no','ยังทำไม่ได้']])}${yesNo('symptoms','6. มีไข้ ผิวหนังแดงร้อน หรือสงสัยติดเชื้อบริเวณตอขาหรือไม่?')}<div class="field" style="margin-top:18px"><label>โรคประจำตัว / ข้อจำกัด / ข้อมูลเพิ่มเติม (สาธิต)</label><textarea rows="3" data-form="medical" placeholder="ระบุข้อมูลสมมติเท่านั้น">${esc(state.form.medical)}</textarea></div><div class="notice"><span>!</span><div><strong>การประเมินนี้ไม่ใช่การวินิจฉัย</strong>เจ้าหน้าที่และบุคลากรทางการแพทย์ต้องพิจารณาความพร้อมเป็นรายบุคคลก่อนกำหนดวันนัด หากมีแผลติดเชื้อ ไข้ หรืออาการผิดปกติ ควรติดต่อสถานพยาบาล</div></div>`}
   if(state.step===3){content=`<p class="form-description" style="margin:0 0 15px">ถ่ายภาพตอขาในบริเวณที่มีแสงสว่าง พื้นหลังเรียบ เห็นตอขาชัดเจน และหลีกเลี่ยงการถ่ายติดใบหน้าหรือข้อมูลส่วนตัวอื่น ๆ</p><div class="photo-grid">${[['front','ด้านหน้า'],['side','ด้านข้าง'],['back','ด้านหลัง']].map(([key,label])=>`<label class="upload-box"><input type="file" accept="image/jpeg,image/png,image/webp" data-photo="${key}" aria-label="เลือกภาพตอขา${label}">${state.photoUrls[key]?`<img src="${state.photoUrls[key]}" alt="ตัวอย่างภาพ${label}"><span class="replace-photo">เปลี่ยนภาพ ${label}</span>`:`<span class="upload-icon">⊕</span><strong>${label}</strong><small>แตะเพื่อเลือกภาพ</small><small>JPEG / PNG / WebP</small>`}</label>`).join('')}</div><p class="mini-note">ภาพที่เลือกจะแสดงบนอุปกรณ์นี้เท่านั้น ไม่ถูกอัปโหลดหรือจัดเก็บในระบบสาธิต จำกัด 5 MB ต่อภาพ</p><div class="notice teal" style="margin-top:16px"><span>ⓘ</span><div>ระบบใช้งานจริงจะจัดเก็บภาพในพื้นที่ส่วนตัวที่เข้าถึงได้เฉพาะเจ้าหน้าที่ที่ได้รับอนุญาตและเจ้าของข้อมูลที่ยืนยันตัวตนแล้วเท่านั้น</div></div>`}
   if(state.step===4){const f=state.form;const completeness=['wound','swelling','pain','movement','mobility','symptoms'].filter(k=>f[k]).length;content=`<div class="form-section-title">สรุปข้อมูลคำขอ</div><div class="field-grid"><div><div class="field-help">ชื่อผู้ขอรับบริการ</div><b>${esc(f.name||'ไม่ได้ระบุ')}</b></div><div><div class="field-help">ประเภทบริการ</div><b>${esc({new:'ทำขาเทียมครั้งแรก',replace:'ทดแทน',repair:'ซ่อม/ปรับแก้'}[f.service])}</b></div><div><div class="field-help">ระดับการตัดขา</div><b>${esc(typeNames[f.level])}</b></div><div><div class="field-help">การประเมิน</div><b>${completeness}/6 ข้อ</b></div><div><div class="field-help">ภาพตอขา</div><b>${Object.keys(state.photos).filter(k=>state.photos[k]).length}/3 ภาพ</b></div></div><div class="divider"></div><label class="consent"><input type="checkbox" data-form="consent" ${f.consent?'checked':''}><span>รับทราบว่าเว็บไซต์นี้เป็นต้นแบบสาธิต ข้อมูลในฟอร์มเป็นข้อมูลสมมติ ไม่ใช่การส่งคิวหรือประวัติผู้ป่วยเข้าสู่โรงพยาบาล และจะไม่ใช้ข้อมูลสุขภาพหรือภาพผู้ป่วยจริง</span></label>`}
@@ -60,15 +68,33 @@ function renderFollowup(){return `${pageHeading('POST-PROSTHETIC FOLLOW-UP','ต
 function followSelect(key,label,options){return `<div class="field"><label>${label}</label><select data-follow="${key}">${options.map(([v,t])=>`<option value="${v}" ${state.follow[key]===v?'selected':''}>${t}</option>`).join('')}</select></div>`}
 function calcStats(){const rows=state.records;const assessed=rows.filter(r=>r.complete===r.total).length;const scheduled=rows.filter(r=>r.status==='scheduled').length;const completed=rows.filter(r=>r.status==='completed').length;const waiting=rows.filter(r=>['pending','review','needs-info'].includes(r.status)).length;const elapsed=rows.filter(r=>r.appointment).map(r=>(new Date(`${r.appointment}T12:00:00`)-new Date(`${r.created}T12:00:00`))/86400000);const mean=elapsed.length?(elapsed.reduce((a,b)=>a+b,0)/elapsed.length).toFixed(1):'–';return {total:rows.length,assessed,scheduled,completed,waiting,mean,followup:rows.reduce((sum,r)=>sum+(r.followups||0),0)}}
 function renderStaff(){const s=calcStats();const filtered=state.records.filter(r=>(state.filter==='all'||r.status===state.filter)&&(`${r.id} ${r.name} ${r.level}`).toLowerCase().includes(state.staffSearch.toLowerCase()));return `${pageHeading('STAFF WORKSPACE','ศูนย์จัดการคิวนัด','ภาพรวมคำขอ การพิจารณาความพร้อม การกำหนดวันนัด และตัวชี้วัดเพื่อนำเสนอผลงานวิชาการ')}<div class="notice" style="margin-bottom:18px"><span>🔒</span><div><strong>โหมดสาธิตสำหรับเจ้าหน้าที่</strong>หน้าจอนี้ยังไม่มีระบบ Login หรือการกำหนดสิทธิ์ ใช้เฉพาะข้อมูลสมมติเท่านั้น ระบบจริงต้องมีการยืนยันตัวตนและจำกัดสิทธิ์เจ้าหน้าที่</div></div><div class="stats-row"><div class="stat-card"><span class="stat-label">คำขอทั้งหมด</span><b>${s.total}</b><small>รายการสาธิต</small></div><div class="stat-card"><span class="stat-label">รอการดำเนินการ</span><b>${s.waiting}</b><small>รอตรวจสอบ / ประเมิน</small></div><div class="stat-card"><span class="stat-label">ยืนยันวันนัด</span><b>${s.scheduled}</b><small>นัดหมายแล้ว</small></div><div class="stat-card"><span class="stat-label">แบบประเมินครบถ้วน</span><b>${s.total?Math.round(s.assessed/s.total*100):0}%</b><small>${s.assessed} จาก ${s.total} ราย</small></div></div><section class="panel"><div class="section-header" style="margin:0 0 15px"><div><h3>รายการคำขอรับบริการ</h3><p>กำหนดวันนัดโดยเจ้าหน้าที่ในระบบจำลอง</p></div><button id="exportCsv">ส่งออก CSV สำหรับวิเคราะห์ ↗</button></div><div class="toolbar"><input class="search-field" id="staffSearch" value="${esc(state.staffSearch)}" placeholder="ค้นหารหัสคำขอ / ชื่อสาธิต"><div class="filter-pills">${[['all','ทั้งหมด'],['pending','รอตรวจสอบ'],['review','ประเมิน'],['scheduled','นัดแล้ว'],['completed','รับบริการแล้ว']].map(([v,t])=>`<button class="filter-pill ${state.filter===v?'selected':''}" data-filter="${v}">${t}</button>`).join('')}</div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>รหัส / ผู้รับบริการ</th><th>ประเภท</th><th>วันที่ยื่น</th><th>สถานะ</th><th>วันนัด</th><th>จัดการ</th></tr></thead><tbody>${filtered.length?filtered.map(r=>`<tr><td><strong>${esc(r.id)}</strong><div class="sub">${esc(r.name)}</div></td><td>${esc(typeNames[r.level])}<div class="sub">${esc({new:'ทำใหม่',replace:'ทดแทน',repair:'ซ่อม'}[r.service])}</div></td><td>${toDate(r.created)}</td><td>${badge(r.status)}</td><td>${r.appointment?toDate(r.appointment):'—'}</td><td><button class="btn btn-outline btn-small" data-manage="${esc(r.id)}">ดู / จัดนัด</button></td></tr>`).join(''):`<tr><td colspan="6"><div class="empty-state">ไม่พบรายการที่ค้นหา</div></td></tr>`}</tbody></table></div></section><div class="section-header"><div><h3>Dashboard เพื่อพัฒนางานวิชาการ</h3><p>ตัวอย่างตัวชี้วัดสำหรับงานวิจัย / R2R / CQI (ยังไม่ใช่ผลจริง)</p></div></div><div class="info-grid"><section class="panel"><h3>ประสิทธิภาพกระบวนการบริการ</h3><div class="field-grid"><div><div class="field-help">ระยะเวลายื่นคำขอถึงวันนัด (เฉลี่ย)</div><div style="font:800 25px Manrope;color:#176f6a;margin:8px 0">${s.mean} <small style="font:500 12px sans-serif">วัน</small></div></div><div><div class="field-help">จำนวนแบบติดตามหลังรับขาเทียม</div><div style="font:800 25px Manrope;color:#176f6a;margin:8px 0">${s.followup} <small style="font:500 12px sans-serif">ครั้ง</small></div></div></div><div class="divider"></div><p class="mini-note">แนวทางประเมินผลจริง: อัตราแบบประเมินครบถ้วน, ระยะเวลารอคิว, อัตรามาตามนัด, อัตราการเกิดแผลหรือการขอปรับแก้หลังรับขาเทียม, ความพึงพอใจผู้รับบริการ (ต้องกำหนดนิยามตัวชี้วัดและเก็บข้อมูลตามระเบียบวิจัย)</p></section><section class="panel"><h3>กรอบการนำเสนอผลงาน</h3><ul class="side-list"><li><span>01</span> วิเคราะห์ปัญหาการนัดหมายและการเตรียมความพร้อมเดิม</li><li><span>02</span> ออกแบบและพัฒนานวัตกรรมบริการดิจิทัล</li><li><span>03</span> ทดสอบการใช้งานและประเมินความถูกต้องทางคลินิก</li><li><span>04</span> เปรียบเทียบตัวชี้วัดก่อน–หลังนำระบบใช้จริง</li><li><span>05</span> รายงานข้อจำกัด ความปลอดภัย และความพึงพอใจ</li></ul></section></div>`}
+function renderTrackingByName(){
+  const search=normalizeName(state.trackingName);
+  const matches=search?state.records.filter(r=>normalizeName(r.name)===search):[];
+  const internalId=matches.length===1?matches[0].id:'__no_name_match__';
+  const priorId=state.trackingId;
+  state.trackingId=internalId;
+  let html=renderTracking();
+  state.trackingId=priorId;
+  html=html.replace(`value="${esc(internalId)}" placeholder="เช่น DT-26001" aria-label="รหัสคำขอ"`,`value="${esc(state.trackingName)}" placeholder="กรอกชื่อ–นามสกุล" aria-label="ชื่อ–นามสกุล"`)
+    .replace('ลองใช้รหัสตัวอย่าง DT-26001, DT-26002, DT-26003 หรือ DT-26004','ข้อมูลทดลอง: ผู้ป่วยตัวอย่าง A, ผู้ป่วยตัวอย่าง B, ผู้ป่วยตัวอย่าง C หรือ ผู้ป่วยตัวอย่าง D')
+    .replace('ไม่พบรหัสคำขอในข้อมูลตัวอย่าง',matches.length>1?'พบชื่อซ้ำหลายรายการ กรุณาติดต่อเจ้าหน้าที่เพื่อยืนยันตัวตน':search?'ไม่พบชื่อ–นามสกุลในข้อมูลตัวอย่าง':'กรอกชื่อ–นามสกุลเพื่อค้นหาสถานะคำขอ')
+    .replace('ในระบบจริง ผู้ป่วยจะเข้าใช้งานผ่านหน้า LINE และเห็นเฉพาะคำขอของตนหลังยืนยันตัวตน','ค้นหาด้วยชื่อ–นามสกุลในข้อมูลสาธิตเท่านั้น ระบบจริงต้องยืนยันตัวตนเพิ่มเติมก่อนแสดงข้อมูลสุขภาพและวันนัด');
+  return html;
+}
 function bindPage(){
   $$('[data-goto]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.goto)));
   if(state.page==='request') bindRequest();
-  if(state.page==='tracking'){$('#trackButton')?.addEventListener('click',()=>{state.trackingId=$('#trackingInput').value.trim();render()});$('#trackingInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){$('#trackButton').click()}})}
+  if(state.page==='tracking'){$('#trackButton')?.addEventListener('click',()=>{state.trackingName=$('#trackingInput').value.trim();render()});$('#trackingInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){$('#trackButton').click()}})}
   if(state.page==='followup') bindFollowup();
   if(state.page==='staff') bindStaff();
 }
 function bindRequest(){
   $$('[data-form]').forEach(el=>el.addEventListener('input',()=>{state.form[el.dataset.form]=el.type==='checkbox'?el.checked:el.value}));
+  $$('[data-amputation-part]').forEach(el=>el.addEventListener('change',()=>{
+    const parts=Object.fromEntries($$('[data-amputation-part]').map(input=>[input.dataset.amputationPart,input.value]));
+    state.form.amputationDate=parts.year&&parts.month&&parts.day?`${parts.year}-${parts.month}-${parts.day}`:'';
+  }));
   $$('[data-photo]').forEach(el=>el.addEventListener('change',e=>{
     const file=e.target.files?.[0];if(!file)return;
     if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){toast('กรุณาเลือกภาพ JPEG/PNG/WebP ขนาดไม่เกิน 5 MB');e.target.value='';return}
@@ -78,13 +104,26 @@ function bindRequest(){
   $('#nextStep')?.addEventListener('click',()=>{
     const f=state.form;
     if(state.step===1&&(!f.name.trim()||!f.phone.trim())){toast('กรุณากรอกชื่อและเบอร์ติดต่อของข้อมูลสาธิตให้ครบ');return}
+    if(state.step===1){
+      const parts=Object.fromEntries($$('[data-amputation-part]').map(input=>[input.dataset.amputationPart,input.value]));
+      const values=Object.values(parts).filter(Boolean);
+      if(values.length>0&&values.length<3){toast('กรุณาเลือกวัน เดือน และปี พ.ศ. ให้ครบ หรือเว้นว่างทั้งหมด');return}
+      if(values.length===3){
+        const iso=`${parts.year}-${parts.month}-${parts.day}`;
+        const d=new Date(`${iso}T12:00:00`);
+        if(Number.isNaN(d.valueOf())||d.getFullYear()!==Number(parts.year)||d.getMonth()+1!==Number(parts.month)||d.getDate()!==Number(parts.day)||d>new Date()){
+          toast('วันที่ตัดขาไม่ถูกต้อง กรุณาตรวจสอบวัน เดือน และปี พ.ศ.');return;
+        }
+        f.amputationDate=iso;
+      }
+    }
     if(state.step===2&&['wound','swelling','pain','movement','mobility','symptoms'].some(k=>!f[k])){toast('กรุณาตอบคำถามประเมินทั้ง 6 ข้อ');return}
     if(state.step===3&&Object.values(state.photos).some(v=>!v)){toast('กรุณาเลือกภาพตัวอย่างให้ครบทั้ง 3 มุม');return}
     if(state.step===4){if(!f.consent){toast('กรุณายืนยันการใช้ข้อมูลสมมติเท่านั้น');return}submitRequest();return}
     state.step++;render();window.scrollTo({top:0,behavior:'smooth'});
   });
 }
-function submitRequest(){const id=`DT-${Math.floor(10000+Math.random()*89999)}`;const date=new Date().toISOString().slice(0,10);const complete=['wound','swelling','pain','movement','mobility','symptoms'].filter(k=>state.form[k]).length+Object.values(state.photos).filter(Boolean).length;state.records.unshift({id,name:state.form.name,phone:state.form.phone,service:state.form.service,level:state.form.level,side:state.form.side,status:'pending',created:date,appointment:'',time:'',note:'ได้รับคำขอสาธิตแล้ว รอเจ้าหน้าที่ตรวจสอบ',complete,total:9,followups:0});state.trackingId=id;state.submittedId=id;render()}
+function submitRequest(){const id=`DT-${Math.floor(10000+Math.random()*89999)}`;const date=new Date().toISOString().slice(0,10);const complete=['wound','swelling','pain','movement','mobility','symptoms'].filter(k=>state.form[k]).length+Object.values(state.photos).filter(Boolean).length;state.records.unshift({id,name:state.form.name,phone:state.form.phone,service:state.form.service,level:state.form.level,side:state.form.side,status:'pending',created:date,appointment:'',time:'',note:'ได้รับคำขอสาธิตแล้ว รอเจ้าหน้าที่ตรวจสอบ',complete,total:9,followups:0});state.trackingId=id;state.trackingName=state.form.name;state.submittedId=id;render()}
 function bindFollowup(){
   $$('[data-follow]').forEach(el=>el.addEventListener('input',()=>{state.follow[el.dataset.follow]=el.value;if(el.dataset.follow==='pain')$('#painValue').textContent=el.value}));
   $('#submitFollow')?.addEventListener('click',()=>{
@@ -113,4 +152,6 @@ $('#modalClose').addEventListener('click',closeModal);
 $('#modalBackdrop').addEventListener('click',e=>{if(e.target===$('#modalBackdrop'))closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 window.addEventListener('beforeunload',()=>Object.values(state.photoUrls).forEach(url=>url&&URL.revokeObjectURL(url)));
+const requestedPage=new URLSearchParams(window.location.search).get('page');
+if(['home','request','tracking','guides','exercise','followup'].includes(requestedPage))state.page=requestedPage;
 render();
