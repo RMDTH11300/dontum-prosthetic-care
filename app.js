@@ -39,7 +39,7 @@ function render(){
   $$('.nav-item').forEach(button=>button.classList.toggle('active',button.dataset.page===state.page));
   $('#currentTitle').textContent=headings[state.page];
   $('#queueBadge').textContent=state.records.filter(r=>['pending','review','needs-info'].includes(r.status)).length;
-  const pages={home:renderHome,request:renderRequest,tracking:renderTrackingByName,guides:renderGuides,exercise:renderExercise,followup:renderFollowup,staff:renderStaff};
+  const pages={home:renderHome,request:renderRequest,tracking:renderTrackingByName,guides:renderGuidesEnhanced,exercise:renderExercise,followup:renderFollowup,staff:renderStaff};
   $('#pageContent').innerHTML=pages[state.page]();
   bindPage();
 }

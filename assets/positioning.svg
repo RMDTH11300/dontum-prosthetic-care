@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+<title id="title">ภาพการจัดท่าเหยียดข้อเข่า</title><desc id="desc">ภาพเวกเตอร์แสดงการวางตอขาในท่าเข่าเหยียดตรงเพื่อหลีกเลี่ยงข้อยึดติด</desc>
+<rect width="720" height="440" rx="30" fill="#e9f5f1"/>
+<rect x="91" y="300" width="536" height="28" rx="14" fill="#73a99c"/><rect x="120" y="328" width="25" height="52" rx="9" fill="#589288"/><rect x="576" y="328" width="25" height="52" rx="9" fill="#589288"/>
+<circle cx="225" cy="194" r="43" fill="#e8b18e"/>
+<path d="M260 220q73-6 128 38l65 7" fill="none" stroke="#267c77" stroke-width="58" stroke-linecap="round"/>
+<path d="M431 270h164" fill="none" stroke="#efba99" stroke-width="55" stroke-linecap="round"/><path d="M431 275h169" fill="none" stroke="#bf866a" stroke-width="4" opacity=".5"/>
+<path d="M432 222v-33m-16 16 16-16 16 16" stroke="#2e8b7e" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="604" cy="265" r="30" fill="#3ca893"/><path d="M588 264l11 11 23-25" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

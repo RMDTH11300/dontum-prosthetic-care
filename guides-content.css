@@ -1,0 +1,28 @@
+.guide-intro-note{display:block;background:#eaf6f1;border:1px solid #b9ddd0;border-radius:12px;color:#285e57;padding:15px 18px;font-size:13px;line-height:1.9;margin-bottom:20px}
+.patient-guides{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.patient-guide{background:#fff;border:1px solid #e0ebe6;border-radius:17px;overflow:hidden;box-shadow:0 8px 22px rgba(31,91,81,.05)}
+.patient-guide-image{height:228px;background:#e8f5f0;overflow:hidden}
+.patient-guide-image img{width:100%;height:100%;display:block;object-fit:cover}
+.patient-guide-body{padding:22px 23px 23px}
+.guide-count{font:800 11px Manrope,sans-serif;letter-spacing:.13em;color:#228377}
+.patient-guide h2,.wrap-module h2,.guide-warning-panel h2{font-size:21px;color:#194b4b;line-height:1.4;margin:12px 0 10px}
+.patient-guide p,.wrap-module p,.guide-warning-panel p{color:#526e6d;font-size:13px;line-height:1.9}
+.patient-guide ul,.guide-alert ul,.guide-sources ul{padding-left:20px;margin:13px 0 0}
+.patient-guide li,.guide-alert li,.guide-sources li{font-size:13px;line-height:1.85;color:#385c59;padding-left:3px;margin-bottom:6px}
+.wrap-module{background:#fff;border:1px solid #d7e8e1;border-radius:19px;padding:29px;box-shadow:0 10px 26px rgba(31,91,81,.06);margin-bottom:19px}
+.wrap-head{max-width:850px}.wrap-head h2{font-size:26px;margin-bottom:5px}.wrap-head p{margin:0 0 22px}
+.wrap-grid{display:grid;grid-template-columns:minmax(250px,.85fr) minmax(320px,1.15fr);gap:28px;align-items:start}
+.wrap-illustration{background:#edf8f3;border-radius:15px;overflow:hidden}.wrap-illustration img{width:100%;display:block}.wrap-illustration p{padding:0 15px 16px;margin:0;color:#728985;font-size:11px;text-align:center}
+.wrap-copy h3,.wrap-specific h3{color:#245653;font-size:17px;margin:5px 0 15px}
+.care-steps{counter-reset:wrapsteps;list-style:none;padding:0;margin:0}
+.care-steps li{position:relative;padding:0 0 15px 45px;font-size:13px;line-height:1.9;color:#40605d;counter-increment:wrapsteps}
+.care-steps li::before{content:counter(wrapsteps);position:absolute;left:0;top:2px;width:30px;height:30px;background:#e2f3eb;color:#19736d;border-radius:50%;display:grid;place-items:center;font:800 13px Manrope,sans-serif}
+.wrap-specific{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.wrap-specific>div{background:#f1f8f4;border-radius:13px;padding:19px}.wrap-specific h3{margin:0 0 4px}.wrap-specific p{margin:0}
+.guide-alert{background:#fff4e7;border:1px solid #f0d1a7;border-radius:13px;padding:20px 22px;margin-top:19px;color:#80502e}
+.guide-alert>strong{font-size:15px}.guide-alert li{color:#73543d}
+.guide-warning-panel{padding:24px 27px;background:#fff9f2;border:1px solid #f1dfc9;border-radius:16px;margin-bottom:19px}.guide-warning-panel h2{font-size:20px;margin:0 0 17px}
+.warning-list{display:grid;grid-template-columns:1fr 1fr;gap:9px}.warning-list span{background:#fff;border:1px solid #f2e4d7;border-radius:9px;padding:12px 13px;font-size:13px;color:#8c583c}
+.guide-sources{padding:17px 23px;color:#677f7b}.guide-sources h3{font-size:14px;color:#4a7069}.guide-sources ul{margin-top:8px}.guide-sources li{font-size:11px}.guide-sources p{font-size:11px;line-height:1.8}
+@media(max-width:900px){.patient-guides,.wrap-grid,.wrap-specific{grid-template-columns:1fr}.patient-guide-image{height:200px}.wrap-module{padding:22px}}
+@media(max-width:600px){.wrap-module{padding:18px}.wrap-head h2{font-size:23px}.warning-list{grid-template-columns:1fr}.patient-guide-body{padding:18px}.patient-guide h2{font-size:19px}}

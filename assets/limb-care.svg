@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+<title id="title">ภาพการตรวจผิวหนังตอขา</title><desc id="desc">ภาพเวกเตอร์ตอขาและแว่นขยาย เพื่อสื่อถึงการตรวจผิวหนังทุกวัน</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#f0faf6"/><stop offset="1" stop-color="#d4eee4"/></linearGradient><linearGradient id="skin" x2=".6" y2="1"><stop stop-color="#f8cfad"/><stop offset="1" stop-color="#e2a47b"/></linearGradient></defs>
+<rect width="720" height="440" rx="30" fill="url(#bg)"/>
+<circle cx="360" cy="225" r="181" fill="#fff" opacity=".58"/>
+<path d="M283 90h154v181c0 50-33 84-77 84s-77-34-77-84z" fill="url(#skin)" stroke="#b97e59" stroke-width="5"/>
+<path d="M285 119h150" stroke="#f5e4d7" stroke-width="9" stroke-linecap="round"/>
+<circle cx="408" cy="246" r="58" fill="#e7fbfb" fill-opacity=".55" stroke="#116b70" stroke-width="12"/>
+<path d="M449 287l74 76" stroke="#116b70" stroke-width="18" stroke-linecap="round"/>
+<circle cx="402" cy="236" r="12" fill="#d47d6f"/><path d="M384 264q18 15 37 0" stroke="#b96762" stroke-width="4" fill="none"/>
+<g fill="#16796d"><circle cx="188" cy="174" r="8"/><circle cx="548" cy="125" r="7"/><circle cx="542" cy="298" r="6"/></g>
+</svg>
