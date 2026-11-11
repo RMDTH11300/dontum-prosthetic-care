@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b6968" />
+  <meta name="description" content="ระบบขอคิวนัดทำขาเทียม ประเมินความพร้อม และติดตามหลังได้รับขาเทียม โรงงานทำขาเทียมพระราชทาน โรงพยาบาลดอนตูม" />
+  <title>DT Prosthetic Care | โรงพยาบาลดอนตูม</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="demo-ribbon"><span class="status-dot"></span> ระบบสาธิต · ใช้ข้อมูลสมมติเท่านั้น · ห้ามกรอกข้อมูลผู้ป่วยจริง</div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">✳</div><div><strong>DT PROSTHETIC</strong><small>CARE CENTER</small></div></div>
+      <div class="hospital-label">โรงงานทำขาเทียมพระราชทาน<br><b>โรงพยาบาลดอนตูม</b></div>
+      <div class="sidebar-caption">เมนูบริการ</div>
+      <nav id="mainNav" aria-label="เมนูหลัก">
+        <button class="nav-item active" data-page="home"><span class="nav-icon">⌂</span> ภาพรวมบริการ</button>
+        <button class="nav-item" data-page="request"><span class="nav-icon">✎</span> ขอคิวนัดทำขาเทียม</button>
+        <button class="nav-item" data-page="tracking"><span class="nav-icon">◷</span> ติดตามสถานะ / วันนัด</button>
+        <button class="nav-item" data-page="guides"><span class="nav-icon">♡</span> การดูแลตอขา</button>
+        <button class="nav-item" data-page="exercise"><span class="nav-icon">✳</span> ท่าออกกำลังกาย</button>
+        <button class="nav-item" data-page="followup"><span class="nav-icon">☑</span> ติดตามหลังรับขาเทียม</button>
+      </nav>
+      <div class="sidebar-caption staff-caption">สำหรับเจ้าหน้าที่</div>
+      <button class="nav-item" data-page="staff"><span class="nav-icon">▦</span> จัดการคิวนัด <span class="nav-badge" id="queueBadge">3</span></button>
+      <div class="sidebar-bottom"><div class="help-card"><span>☏</span><div><b>มีข้อสงสัย?</b><small>ติดต่อโรงงานทำขาเทียมพระราชทาน โรงพยาบาลดอนตูม</small></div></div><p>© 2026 Don Tum Hospital<br>Rehabilitation & Prosthetics Service</p></div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuToggle" aria-label="เปิดเมนู">☰</button>
+        <div class="topbar-breadcrumb"><span>บริการผู้ป่วย</span><span class="crumb-divider">/</span><b id="currentTitle">ภาพรวมบริการ</b></div>
+        <div class="topbar-actions"><span class="live-pill"><i></i> DEMO PREVIEW</span><span class="avatar">DT</span></div>
+      </header>
+      <main id="pageContent" tabindex="-1"></main>
+      <footer class="content-footer">โรงงานทำขาเทียมพระราชทาน โรงพยาบาลดอนตูม · ระบบสาธิตเพื่อทดสอบขั้นตอนบริการ ไม่ใช่ระบบเวชระเบียนจริง</footer>
+    </div>
+  </div>
+  <div id="toastRegion" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop hidden" id="modalBackdrop" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" id="modalClose" aria-label="ปิด">×</button><div id="modalContent"></div></div></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
