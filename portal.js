@@ -15,7 +15,8 @@
     ['symptoms','มีอาการผิดปกติอื่นที่ต้องการแจ้งหรือไม่?', [['no','ไม่มี'],['yes','มี'],['unsure','ไม่แน่ใจ']]]
   ];
   const cfg=window.DT_PORTAL_CONFIG;
-  const configured=!!(cfg&&cfg.productionApproved&&/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.url||'')&&cfg.publishableKey&&!cfg.publishableKey.includes('YOUR-'));
+  const testMode=cfg?.testMode===true && cfg?.productionApproved===false;
+  const configured=!!(cfg&&(cfg.productionApproved===true||testMode)&&/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.url||'')&&/^sb_publishable_[A-Za-z0-9_-]+$/.test(cfg.publishableKey||''));
   if(!configured){$('configState').textContent='ระบบนี้ยังไม่เปิดรับข้อมูลจริง: ต้องได้รับอนุมัติจากโรงพยาบาล ติดตั้งฐานข้อมูล ตรวจสอบนโยบายสิทธิ์ และตั้งค่า portal-config.js ก่อน';return;}
   if(!window.supabase?.createClient){$('configState').textContent='ไม่สามารถโหลดชุดเชื่อมต่อฐานข้อมูล กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';return;}
   const db=window.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
@@ -90,7 +91,13 @@
     if(!user){$('authPanel').classList.remove('hide');$('mainPanel').classList.add('hide');return;}
     try{await refresh();}catch(e){setMessage('โหลดข้อมูลไม่ได้: '+e.message,'error');}
   }
-  $('configState').textContent='เชื่อมต่อฐานข้อมูลที่ได้รับการตั้งค่าแล้ว (ตรวจสอบสิทธิ์ก่อนใช้งานจริง)';$('configState').classList.add('ready');
+  if(testMode){
+    $('configState').textContent='โหมดทดสอบเท่านั้น — ใช้บัญชีทดสอบและข้อมูลสมมติ ห้ามกรอกชื่อ เบอร์โทร หรือรูปภาพผู้ป่วยจริง';
+    document.title='[ทดสอบเท่านั้น] DT Prosthetic Care';
+  }else{
+    $('configState').textContent='เชื่อมต่อฐานข้อมูลที่ได้รับการอนุมัติแล้ว';
+    $('configState').classList.add('ready');
+  }
   db.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>onSession(session),0)});
   db.auth.getSession().then(({data,error})=>{if(error)setMessage(error.message,'error');else onSession(data.session);});
 })();
